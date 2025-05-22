@@ -3,8 +3,7 @@ import RegisterPresenter from './register-presenter';
 export default class RegisterPage {
   async render() {
     return `
-     
-       <section class="register-container" id="main-content">
+      <section class="register-container" id="main-content">
         <h1>Daftar Akun</h1>
 
         <form id="registerForm" class="form-box">
@@ -32,7 +31,6 @@ export default class RegisterPage {
   }
 
   async afterRender() {
-    // Do your job here
     RegisterPresenter.init({
       onSuccess: (message) => {
         alert(`Berhasil daftar: ${message}`);
@@ -40,9 +38,7 @@ export default class RegisterPage {
       },
       onError: (errorMessage) => {
         alert(`Gagal daftar: ${errorMessage}`);
-      }
+      },
     });
-
-    
   }
 }

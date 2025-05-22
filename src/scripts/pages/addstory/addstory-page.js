@@ -6,12 +6,10 @@ export default class AddStoryPage {
       <section class="addstory-container" id="main-content">
         <h1>Tambah Cerita</h1>
         <form id="storyForm" enctype="multipart/form-data" class="form-box">
-
           <div class="form-group">
             <label for="description">Deskripsi Cerita:</label>
             <textarea id="description" name="description" rows="4" required></textarea>
           </div>
-
           <div class="form-group">
             <label for="photo">Unggah Gambar:</label>
             <input type="file" id="photo" name="photo" accept="image/*" required>
@@ -19,13 +17,14 @@ export default class AddStoryPage {
             <small>Atau gunakan kamera di bawah</small>
           </div>
 
-          <div class="form-group">
-            <video id="camera" autoplay muted playsinline style="width: 100%; display: none;"></video>
-            <button type="button" id="capture-button" class="btn btn-primary" style="margin-top: 0.5rem;">
-              📸 Ambil dari Kamera
-            </button>
-            <canvas id="canvas" style="display: none;"></canvas>
-          </div>
+         <div class="form-group">
+          <video id="camera" autoplay muted playsinline style="width: 100%; display: none;"></video>
+          <canvas id="canvas" style="display: none;"></canvas>
+          <img id="photoPreview" style="width: 100%; display: none; margin-top: 1rem;" alt="Preview Foto"/>
+          <button type="button" id="capture-button" class="btn btn-primary" style="margin-top: 0.5rem;">
+            📷 Nyalakan Kamera
+          </button>
+        </div>
 
           <div class="form-group">
             <label for="map">Klik pada peta untuk menandai lokasi:</label>
@@ -33,7 +32,6 @@ export default class AddStoryPage {
             <input type="hidden" id="lat" name="lat">
             <input type="hidden" id="lon" name="lon">
           </div>
-
           <button type="submit" class="submit-button">Kirim Cerita</button>
         </form>
       </section>
@@ -52,7 +50,7 @@ export default class AddStoryPage {
     }).addTo(map);
 
     let marker;
-    map.on('click', function (e) {
+    map.on('click', (e) => {
       const { lat, lng } = e.latlng;
       if (marker) {
         marker.setLatLng([lat, lng]);

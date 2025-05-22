@@ -3,8 +3,7 @@ import LoginPresenter from './login-presenter.js';
 export default class LoginPage {
   async render() {
     return `
-     
-       <section class="login-container" id="main-content">
+      <section class="login-container" id="main-content">
         <h1>Masuk ke Aplikasi</h1>
 
         <form id="loginForm" class="form-box">
@@ -23,22 +22,18 @@ export default class LoginPage {
 
         <p class="register-hint">Belum punya akun? <a href="#/register">Daftar di sini</a></p>
       </section>
-
     `;
   }
 
   async afterRender() {
-    // Do your job here
-     await LoginPresenter.init({
+    await LoginPresenter.init({
       onSuccess: (message) => {
         alert(message);
-        window.location.hash = '#/'; // Redirect ke home page atau halaman utama
+        window.location.hash = '#/';
       },
       onError: (errorMessage) => {
-        alert(errorMessage); // Tampilkan pesan error
+        alert(errorMessage);
       },
     });
-
-    
   }
 }

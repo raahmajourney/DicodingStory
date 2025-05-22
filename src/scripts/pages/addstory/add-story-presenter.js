@@ -1,102 +1,104 @@
 import StoryModel from '../../data/story-model';
-
+import AddStoryView from './add-story-view';
 
 export default class AddStoryPresenter {
   constructor() {
-    this._collectElements();
+    this.elements = AddStoryView.getElements();
+    this.stream = null;
     this._setupEventListeners();
   }
 
-  _collectElements() {
-    this.form = document.querySelector('#storyForm');
-    this.descriptionInput = document.querySelector('#description');
-    this.photoInput = document.querySelector('#photo');
-    this.latInput = document.querySelector('#lat');
-    this.lonInput = document.querySelector('#lon');
-    this.camera = document.querySelector('#camera');
-    this.canvas = document.querySelector('#canvas');
-    this.captureButton = document.querySelector('#capture-button');
-  }
-
   _setupEventListeners() {
-    this._handleCameraCapture();
+    this._handleCameraToggle();
     this._handleFormSubmission();
   }
 
-  _handleCameraCapture() {
-    if (!this.captureButton || !this.camera || !this.canvas || !this.photoInput) return;
+  _handleCameraToggle() {
+    const { captureButton, camera, canvas, photoInput } = this.elements;
 
-    this.captureButton.addEventListener('click', async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        this._startCameraPreview(stream);
-
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        this._captureImageFromCamera();
-        this._stopCamera(stream);
-      } catch (error) {
-        console.error('Gagal membuka kamera:', error);
-        alert('Gagal menggunakan kamera. Silakan unggah foto secara manual.');
+    captureButton.addEventListener('click', async () => {
+      // Kamera belum aktif → nyalakan
+      if (!this.stream) {
+        try {
+          this.stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          camera.srcObject = this.stream;
+          AddStoryView.showCamera(camera);
+          AddStoryView.hidePreviewImage();
+          AddStoryView.updateCaptureButton(true);
+        } catch (err) {
+          console.error('Kamera error:', err);
+          AddStoryView.showAlert('Gagal mengakses kamera.');
+        }
+        return;
       }
+
+      // Kamera aktif → ambil foto lalu matikan kamera
+      this._captureImage(camera, canvas, photoInput);
+      this._stopCamera();
+      AddStoryView.hideCamera(camera);
+      AddStoryView.updateCaptureButton(false);
     });
   }
 
-  _startCameraPreview(stream) {
-    this.camera.srcObject = stream;
-    this.camera.style.display = 'block';
-  }
+  _captureImage(video, canvas, photoInput) {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
 
-  _captureImageFromCamera() {
-    this.canvas.width = this.camera.videoWidth;
-    this.canvas.height = this.camera.videoHeight;
+    const context = canvas.getContext('2d');
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    const context = this.canvas.getContext('2d');
-    context.drawImage(this.camera, 0, 0, this.canvas.width, this.canvas.height);
+    canvas.toBlob((blob) => {
+      const file = new File([blob], 'captured.jpg', { type: 'image/jpeg' });
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      photoInput.files = dt.files;
 
-    this.canvas.toBlob((blob) => {
-      const photoFile = new File([blob], 'captured.jpg', { type: 'image/jpeg' });
-      const dataTransfer = new DataTransfer();
-      dataTransfer.items.add(photoFile);
-      this.photoInput.files = dataTransfer.files;
+      // Tampilkan preview
+      const reader = new FileReader();
+      reader.onload = () => {
+        AddStoryView.showPreviewImage(reader.result);
+      };
+      reader.readAsDataURL(file);
     }, 'image/jpeg');
   }
 
-  _stopCamera(stream) {
-    stream.getTracks().forEach((track) => track.stop());
-    this.camera.style.display = 'none';
+  _stopCamera() {
+    if (this.stream) {
+      this.stream.getTracks().forEach((track) => track.stop());
+      this.stream = null;
+    }
   }
 
   _handleFormSubmission() {
-    if (!this.form) return;
+    const { form, descriptionInput, photoInput, latInput, lonInput } = this.elements;
 
-    this.form.addEventListener('submit', async (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const photoFile = this.photoInput.files[0];
+      const photoFile = photoInput.files[0];
       if (!photoFile) {
-        alert('Harap unggah atau ambil foto terlebih dahulu.');
+        AddStoryView.showAlert('Harap unggah atau ambil foto terlebih dahulu.');
         return;
       }
 
       const storyData = {
-        description: this.descriptionInput.value.trim(),
+        description: descriptionInput.value.trim(),
         photo: photoFile,
-        lat: this.latInput.value,
-        lon: this.lonInput.value,
+        lat: latInput.value,
+        lon: lonInput.value,
       };
 
       try {
         const response = await StoryModel.postStory(storyData);
         if (response.error) {
-          alert(`Gagal: ${response.message}`);
+          AddStoryView.showAlert(`Gagal: ${response.message}`);
         } else {
-          alert('Cerita berhasil dikirim!');
+          AddStoryView.showAlert('Cerita berhasil dikirim!');
           window.location.hash = '/';
         }
       } catch (error) {
-        console.error('Kesalahan saat mengirim cerita:', error);
-        alert('Terjadi kesalahan saat mengirim cerita.');
+        console.error(error);
+        AddStoryView.showAlert('Terjadi kesalahan saat mengirim cerita.');
       }
     });
   }
