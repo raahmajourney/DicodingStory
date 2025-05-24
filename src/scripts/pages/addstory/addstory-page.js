@@ -38,9 +38,12 @@ export default class AddStoryPage {
     `;
   }
 
-  async afterRender() {
+   async afterRender() {
     this._initializeMap();
-    new AddStoryPresenter();
+    this._presenter = new AddStoryPresenter();
+
+    window.addEventListener('hashchange', this._onPageChange);
+    window.addEventListener('beforeunload', this._onPageChange); // optional untuk refresh
   }
 
   _initializeMap() {
@@ -61,4 +64,14 @@ export default class AddStoryPage {
       document.querySelector('#lon').value = lng;
     });
   }
+
+  _onPageChange = () => {
+    if (this._presenter) {
+      this._presenter.destroy();
+    }
+
+    window.removeEventListener('hashchange', this._onPageChange);
+    window.removeEventListener('beforeunload', this._onPageChange);
+  };
+  
 }

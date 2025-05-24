@@ -1,5 +1,5 @@
+import AddStoryView from './add-story-view.js';
 import StoryModel from '../../data/story-model';
-import AddStoryView from './add-story-view';
 
 export default class AddStoryPresenter {
   constructor() {
@@ -58,6 +58,10 @@ export default class AddStoryPresenter {
       this.stream.getTracks().forEach((track) => track.stop());
       this.stream = null;
     }
+  }
+
+  destroy() {
+    this._stopCamera(); // Clean-up ketika pindah halaman
   }
 
   async _onFormSubmitted(e) {
