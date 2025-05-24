@@ -1,4 +1,3 @@
-
 import DetailPresenter from './detail-presenter';
 
 export default class DetailPage {
@@ -17,10 +16,9 @@ export default class DetailPage {
   }
 
   async afterRender() {
-    const storyContainer = document.querySelector('#storyDetail');
     const hash = window.location.hash;
     const id = hash.split('/')[2];
 
-    await DetailPresenter.init({ id, container: storyContainer });
+    await DetailPresenter.init(id);
   }
 }

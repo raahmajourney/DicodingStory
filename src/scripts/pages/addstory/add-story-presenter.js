@@ -3,60 +3,51 @@ import AddStoryView from './add-story-view';
 
 export default class AddStoryPresenter {
   constructor() {
-    this.elements = AddStoryView.getElements();
+    this.view = AddStoryView;
     this.stream = null;
-    this._setupEventListeners();
+
+    this.view.bindCaptureButton(() => this._onCaptureButtonClicked());
+    this.view.bindFormSubmit((e) => this._onFormSubmitted(e));
   }
 
-  _setupEventListeners() {
-    this._handleCameraToggle();
-    this._handleFormSubmission();
-  }
+  async _onCaptureButtonClicked() {
+    const video = this.view.getVideoElement();
+    const canvas = this.view.getCanvasElement();
 
-  _handleCameraToggle() {
-    const { captureButton, camera, canvas, photoInput } = this.elements;
-
-    captureButton.addEventListener('click', async () => {
-      // Kamera belum aktif → nyalakan
-      if (!this.stream) {
-        try {
-          this.stream = await navigator.mediaDevices.getUserMedia({ video: true });
-          camera.srcObject = this.stream;
-          AddStoryView.showCamera(camera);
-          AddStoryView.hidePreviewImage();
-          AddStoryView.updateCaptureButton(true);
-        } catch (err) {
-          console.error('Kamera error:', err);
-          AddStoryView.showAlert('Gagal mengakses kamera.');
-        }
-        return;
+    if (!this.stream) {
+      try {
+        this.stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = this.stream;
+        this.view.showCamera();
+        this.view.hidePreviewImage();
+        this.view.updateCaptureButton(true);
+      } catch (err) {
+        console.error('Kamera error:', err);
+        this.view.showAlert('Gagal mengakses kamera.');
       }
+      return;
+    }
 
-      // Kamera aktif → ambil foto lalu matikan kamera
-      this._captureImage(camera, canvas, photoInput);
-      this._stopCamera();
-      AddStoryView.hideCamera(camera);
-      AddStoryView.updateCaptureButton(false);
-    });
+    this._captureImage(video, canvas);
+    this._stopCamera();
+    this.view.hideCamera();
+    this.view.updateCaptureButton(false);
   }
 
-  _captureImage(video, canvas, photoInput) {
+  _captureImage(video, canvas) {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
 
-    const context = canvas.getContext('2d');
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
     canvas.toBlob((blob) => {
       const file = new File([blob], 'captured.jpg', { type: 'image/jpeg' });
-      const dt = new DataTransfer();
-      dt.items.add(file);
-      photoInput.files = dt.files;
+      this.view.setPhotoInputFile(file);
 
-      // Tampilkan preview
       const reader = new FileReader();
       reader.onload = () => {
-        AddStoryView.showPreviewImage(reader.result);
+        this.view.showPreviewImage(reader.result);
       };
       reader.readAsDataURL(file);
     }, 'image/jpeg');
@@ -69,37 +60,27 @@ export default class AddStoryPresenter {
     }
   }
 
-  _handleFormSubmission() {
-    const { form, descriptionInput, photoInput, latInput, lonInput } = this.elements;
+  async _onFormSubmitted(e) {
+    e.preventDefault();
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
+    const data = this.view.getFormData();
 
-      const photoFile = photoInput.files[0];
-      if (!photoFile) {
-        AddStoryView.showAlert('Harap unggah atau ambil foto terlebih dahulu.');
-        return;
+    if (!data.photo) {
+      this.view.showAlert('Harap unggah atau ambil foto terlebih dahulu.');
+      return;
+    }
+
+    try {
+      const response = await StoryModel.postStory(data);
+      if (response.error) {
+        this.view.showAlert(`Gagal: ${response.message}`);
+      } else {
+        this.view.showAlert('Cerita berhasil dikirim!');
+        this.view.navigateTo('/');
       }
-
-      const storyData = {
-        description: descriptionInput.value.trim(),
-        photo: photoFile,
-        lat: latInput.value,
-        lon: lonInput.value,
-      };
-
-      try {
-        const response = await StoryModel.postStory(storyData);
-        if (response.error) {
-          AddStoryView.showAlert(`Gagal: ${response.message}`);
-        } else {
-          AddStoryView.showAlert('Cerita berhasil dikirim!');
-          window.location.hash = '/';
-        }
-      } catch (error) {
-        console.error(error);
-        AddStoryView.showAlert('Terjadi kesalahan saat mengirim cerita.');
-      }
-    });
+    } catch (err) {
+      console.error(err);
+      this.view.showAlert('Terjadi kesalahan saat mengirim cerita.');
+    }
   }
 }

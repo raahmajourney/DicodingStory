@@ -13,40 +13,71 @@ const AddStoryView = {
     };
   },
 
-  showCamera(camera) {
-    camera.style.display = 'block';
+  bindCaptureButton(handler) {
+    this.getElements().captureButton.addEventListener('click', handler);
   },
 
-  hideCamera(camera) {
-    camera.style.display = 'none';
+  bindFormSubmit(handler) {
+    this.getElements().form.addEventListener('submit', handler);
   },
 
-  showAlert(message) {
-    alert(message);
+  showCamera() {
+    this.getElements().camera.style.display = 'block';
   },
 
-   showPreviewImage(dataUrl) {
-    const preview = document.querySelector('#photoPreview');
+  hideCamera() {
+    this.getElements().camera.style.display = 'none';
+  },
+
+  showPreviewImage(dataUrl) {
+    const preview = this.getElements().photoPreview;
     preview.src = dataUrl;
     preview.style.display = 'block';
   },
 
   hidePreviewImage() {
-    const preview = document.querySelector('#photoPreview');
+    const preview = this.getElements().photoPreview;
     preview.style.display = 'none';
     preview.src = '';
   },
 
   updateCaptureButton(isStreaming) {
-    const btn = document.querySelector('#capture-button');
+    const btn = this.getElements().captureButton;
     btn.textContent = isStreaming ? '📷 Ambil Foto' : '📷 Nyalakan Kamera';
   },
-
 
   showAlert(message) {
     alert(message);
   },
 
+  navigateTo(route) {
+    window.location.hash = route;
+  },
+
+  getFormData() {
+    const { descriptionInput, photoInput, latInput, lonInput } = this.getElements();
+    return {
+      description: descriptionInput.value.trim(),
+      photo: photoInput.files[0],
+      lat: latInput.value,
+      lon: lonInput.value,
+    };
+  },
+
+  setPhotoInputFile(file) {
+    const photoInput = this.getElements().photoInput;
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    photoInput.files = dt.files;
+  },
+
+  getVideoElement() {
+    return this.getElements().camera;
+  },
+
+  getCanvasElement() {
+    return this.getElements().canvas;
+  },
 };
 
 export default AddStoryView;

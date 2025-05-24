@@ -1,6 +1,7 @@
 const DetailView = {
   renderDetail(story) {
-    return `
+    const container = document.querySelector('#storyDetail');
+    container.innerHTML = `
       <article class="story-item">
         <img src="${story.photoUrl}" alt="${story.name}" />
         <h2>${story.name}</h2>
@@ -8,9 +9,14 @@ const DetailView = {
         <small>Created at: ${new Date(story.createdAt).toLocaleString()}</small>
       </article>
     `;
+
+    if (story.lat && story.lon) {
+      this.initMap(story.lat, story.lon, story.name);
+    }
   },
 
-  renderError(container, message) {
+  renderError(message) {
+    const container = document.querySelector('#storyDetail');
     container.innerHTML = `<p class="error-message">${message}</p>`;
   },
 

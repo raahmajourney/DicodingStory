@@ -348,6 +348,13 @@ input[type="password"] {
 
 /* detail card story style  */
 
+.footer {
+  text-align: center;
+  padding: 1em 0;
+  color: #333;
+  font-size: 0.9em;
+}
+
 
 
 @media screen and (width > 1000px) {
