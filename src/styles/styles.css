@@ -346,6 +346,37 @@ input[type="password"] {
 
 }
 
+.delete-button {
+  background-color: #f44336;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+#save-favorite {
+  background-color: #10b981;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+#save-favorite:hover {
+  background-color: #059669;
+  transform: scale(1.02);
+}
+
+#save-favorite:active {
+  transform: scale(0.98);
+}
+
+
+
 /* detail card story style  */
 
 .footer {

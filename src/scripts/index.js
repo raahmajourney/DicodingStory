@@ -1,8 +1,7 @@
 // CSS imports
 import '../styles/styles.css';
-
-
 import App from './pages/app';
+import { registerSW } from 'virtual:pwa-register';
 
 document.addEventListener('DOMContentLoaded', async () => {
   const app = new App({
@@ -62,3 +61,22 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
+// main.js atau entry point app kamu
+ // if ('serviceWorker' in navigator && 'PushManager' in window) {
+  //  window.addEventListener('load', () => {
+  //    navigator.serviceWorker.register('/service-worker.js')
+ // //      .then(() => console.log('Service Worker registered'))
+ //       .catch(err => console.error('Service Worker registration failed:', err));
+ //   });
+ // }
+
+const updateSW = registerSW({
+  onNeedRefresh() {
+    if (confirm('Update tersedia. Muat ulang sekarang?')) {
+      updateSW(true);
+    }
+  },
+  onOfflineReady() {
+    console.log('App siap digunakan secara offline');
+  },
+});

@@ -1,5 +1,6 @@
 import AddStoryView from './add-story-view.js';
 import StoryModel from '../../data/story-model';
+import { showLocalNotification } from '../../utils/push-helper';
 
 export default class AddStoryPresenter {
   constructor() {
@@ -78,10 +79,17 @@ export default class AddStoryPresenter {
       const response = await StoryModel.postStory(data);
       if (response.error) {
         this.view.showAlert(`Gagal: ${response.message}`);
-      } else {
+      }
+      else {
         this.view.showAlert('Cerita berhasil dikirim!');
+
+        // ⬇️ Tambahkan notifikasi lokal
+      showLocalNotification('Story berhasil dibuat', {
+      body: `Anda telah membuat story baru dengan deskripsi: ${data.description}`,
+      });
         this.view.navigateTo('/');
       }
+
     } catch (err) {
       console.error(err);
       this.view.showAlert('Terjadi kesalahan saat mengirim cerita.');

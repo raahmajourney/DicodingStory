@@ -7,8 +7,10 @@ const DetailPresenter = {
       const response = await StoryModel.getStoryDetail(id);
       const story = response.story;
       DetailView.renderDetail(story);
+      return story;
     } catch (error) {
       DetailView.renderError(error.message);
+      return null; 
     }
   }
 };
