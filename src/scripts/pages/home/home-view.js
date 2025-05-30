@@ -18,13 +18,27 @@ const HomeView = {
     `).join('');
   },
 
+  renderSubscriptionButton(isSubscribed) {
+    return `
+      <section class="unsubscribe-section">
+        <button id="subscription-btn" class="btn-subscription">
+          ${isSubscribed ? 'Unsubscribe' : 'Subscribe'}
+        </button>
+      </section>
+    `;
+  },
+
+  renderAll({ storyContainer, subscriptionContainer, stories, isSubscribed }) {
+    subscriptionContainer.innerHTML = this.renderSubscriptionButton(isSubscribed);
+    storyContainer.innerHTML = this.renderStories(stories);
+  },
+
   renderError(container, message) {
     container.innerHTML = `<p class="error-message">${message}</p>`;
   },
 
   initMap(stories) {
     const map = L.map('map').setView([-2.5, 118], 4);
-
     const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',
     }).addTo(map);
@@ -36,17 +50,11 @@ const HomeView = {
         storyMarkers.addLayer(marker);
       }
     });
+
     storyMarkers.addTo(map);
+    L.control.layers({ "OpenStreetMap": osm }, { "Cerita Marker": storyMarkers }).addTo(map);
 
-    L.control.layers({
-      "OpenStreetMap": osm,
-    }, {
-      "Cerita Marker": storyMarkers,
-    }).addTo(map);
-
-    requestAnimationFrame(() => {
-      map.invalidateSize();
-    });
+    requestAnimationFrame(() => map.invalidateSize());
   },
 
   bindDetailLinkAnimation() {

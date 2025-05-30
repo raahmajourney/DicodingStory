@@ -73,3 +73,15 @@ export async function getStoryDetail(id) {
 
   return await response.json();
 }
+
+export async function unsubscribePush() {
+  const token = localStorage.getItem('token');
+  const response = await fetch(`${CONFIG.BASE_URL}/notifications/subscribe`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return await response.json();
+}

@@ -1,7 +1,8 @@
-// CSS imports
 import '../styles/styles.css';
 import App from './pages/app';
 import { registerSW } from 'virtual:pwa-register';
+import { subscribePush } from './utils/push-helper'; // atau sesuaikan path-nya
+
 
 document.addEventListener('DOMContentLoaded', async () => {
   const app = new App({
@@ -10,6 +11,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     navigationDrawer: document.querySelector('#navigation-drawer'),
   });
   await app.renderPage();
+
+
+  // ✅ Minta izin notifikasi
+  if ('Notification' in window && 'serviceWorker' in navigator) {
+    const permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+      const token = localStorage.getItem('token');
+      if (token) {
+        subscribePush(token)
+          .then((res) => console.log('Push Subscription Success:', res))
+          .catch((err) => console.error('Push Subscription Failed:', err));
+      }
+    } else {
+      console.warn('Notification permission denied');
+    }
+  }
 
   window.addEventListener('hashchange', async () => {
     await app.renderPage();

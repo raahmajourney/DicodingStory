@@ -83,10 +83,8 @@ export default class AddStoryPresenter {
       else {
         this.view.showAlert('Cerita berhasil dikirim!');
 
-        // ⬇️ Tambahkan notifikasi lokal
-      showLocalNotification('Story berhasil dibuat', {
-      body: `Anda telah membuat story baru dengan deskripsi: ${data.description}`,
-      });
+     showLocalNotification(data.description);
+
         this.view.navigateTo('/');
       }
 

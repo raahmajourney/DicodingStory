@@ -1,6 +1,6 @@
 import LoginModel from '../../data/login-model';
 import LoginView from './login-view';
-import { subscribeUserToPush } from '../../utils/push-helper';
+import { subscribePush } from '../../utils/push-helper';
 
 const LoginPresenter = {
   async init({ onSuccess, onError }) {
@@ -28,7 +28,7 @@ const LoginPresenter = {
 async function initPush() {
   const permission = await Notification.requestPermission();
   if (permission === 'granted') {
-    await subscribeUserToPush();
+    await subscribePush();
   }
 }
 
